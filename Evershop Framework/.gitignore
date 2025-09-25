@@ -1,0 +1,18 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+.env
+
+.DS_Store
+.playwright-mcp/
+*.log
+dist/
+logs/
+reports/
+sonar/
+trash/
