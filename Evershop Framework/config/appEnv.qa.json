@@ -1,0 +1,9 @@
+{
+  "name": "qa",
+  "baseUrl": "https://demo.evershop.io/admin/login",
+  "defaultUser": {
+    "username": "Demo",
+    "email": "demo@evershop.io",
+    "password": "123456"
+  }
+}

@@ -6,8 +6,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
-.env
-
+.env.local
 .DS_Store
 .playwright-mcp/
 *.log

@@ -8,7 +8,7 @@ export class TableBaseClass {
       // Generic page elements
       primaryButton: (text: string) => this.page.locator('.primaryButton', { hasText: text }),
       pageTitle: (title: string) => this.page.locator('.page-heading-title', { hasText: title }),
-      clearFilter: this.page.getByRole('link', { name: 'Clear filter' }),
+      clearFilter:(link: string)=> this.page.locator('.text-interactive', { hasText: link }),
       search: this.page.getByPlaceholder('Search'),
 
       // Pagination and records
@@ -81,8 +81,8 @@ export class TableBaseClass {
     return this.tableLocators.pageTitle(title).isVisible();
   }
 
-  async clearFilters() {
-    await this.tableLocators.clearFilter.click();
+  async clicklink(link: string) {
+    await this.tableLocators.clearFilter(link).click();
   }
 
   async searchText(text: string) {
