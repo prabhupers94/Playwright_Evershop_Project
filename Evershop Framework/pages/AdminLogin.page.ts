@@ -1,6 +1,8 @@
 import { expect,Page } from '@playwright/test'
 import { BasePage } from '../pages/Base.page'
-
+import { TestUser } from '../data/factories';
+import { log } from '../utils/logger.js';
+import {appEnv} from '../config/env';
 export class AdminLogin extends BasePage{
 
     
@@ -20,13 +22,16 @@ export class AdminLogin extends BasePage{
         } as const
     }
 
-    public loginAsAdmin=async(email:string,password:string):Promise<void>=>{
+    public loginAsAdmin=async(AdminLogginUser: TestUser):Promise<void>=>{
 
         await expect(this.locators.adminLoginForm).toBeVisible({timeout:5000});
-        await this.locators.emailInput.fill(email);
-        await this.locators.passwordInput.fill(password);
+        await this.locators.emailInput.fill(AdminLogginUser.email);
+        await this.locators.passwordInput.fill(AdminLogginUser.password);
         await this.locators.signInBtn.click();
+        await log.info(`Login initiated successfully for email: ${AdminLogginUser.email}`);
  }
 
- 
+  async go(): Promise<void> {
+    await this.page.goto(appEnv.baseUrl);
+  }
 }

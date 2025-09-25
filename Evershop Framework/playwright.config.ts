@@ -1,79 +1,46 @@
+/*
+ * Playwright Test Configuration
+ * This configuration file sets up Playwright for end-to-end testing.
+ * It includes settings for retries, timeouts, reporters, and browser configurations.
+ */
+
 import { defineConfig, devices } from '@playwright/test';
+import { appEnv } from './config/env.js';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
-  testDir: './tests',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-  },
-
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+  testDir: './tests', // Directory where test files are located
+  fullyParallel: true, //Enables tests to run in parallel across all available workers for faster execution
+  workers: process.env.CI ? 4 : 2, // 1 worker locally for debugging & More workers in CI. Worker runs tests in parallel in a context.
+  retries: process.env.CI ? 2 : 0, // 2 retries in CI for flaky tests, 0 locally for faster feedback
+  forbidOnly: !!process.env.CI, // Fail if a test is marked as 'only' in CI
+  timeout: 600_000, // 10 mins a test can run before timing out
+  expect: { timeout: 60_000 }, // 1 min for assertions
+  outputDir: 'reports/test-results',
+  reporter: [
+    ['html', { open: 'never', outputFolder: 'reports/html-report' }], // Generates an HTML report after tests run, does not open automatically
+    ['junit', { outputFile: 'reports/junit/results.xml' }], // Generates a JUnit report for CI integration
+    ['json', { outputFile: 'reports/results.json' }],
+    ['allure-playwright', { resultsDir: 'reports/allure-results' }], // Generates Allure reports for detailed test results
+    //['lcov', { outputFile: 'reports/coverage/lcov.info' }],
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  use: {
+    baseURL: appEnv.baseUrl, // Base URL for the application under test, loaded from environment configuration
+    trace: 'on', // 'retain-on-failure' Retains traces for debugging only when tests fail
+    video: 'on', // 'retain-on-failure' Records videos of test runs, retained only on failure
+    screenshot: 'only-on-failure', // Takes screenshots only on test failure
+    // Add navigation timeout for better debugging
+    navigationTimeout: 60_000, // 1 min for page navigation
+    actionTimeout: 15_000, // 15 sec for actions like click, fill
+  },
+  projects: [
+    // This determines what type of page object is created
+    { name: 'chromium', use: { ...devices['Chrome'] } },
+    ...(process.env.CI
+      ? [
+          { name: 'firefox', use: { ...devices['Firefox'] } },
+          { name: 'webkit', use: { ...devices['Safari'] } },
+        ]
+      : []),
+  ],
+  
 });
